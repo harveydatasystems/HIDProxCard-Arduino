@@ -11,6 +11,8 @@ I've chosen to use a device watcher for this project.<br />
 Be sure to add the Device Capability of serialCommunication.<br />
 ><i>This can be found in the Package.appxmanifest file</i>
 
-
-
 # Example code for working with .net5 applications
+Coming Soon 
+
+# Example code for working with WPF Apps
+Coming Soon 
