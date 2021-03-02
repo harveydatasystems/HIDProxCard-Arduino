@@ -47,7 +47,9 @@ namespace net5Demo
                 enumerator.MoveNext();
                 InitDevice((ManagementObject)enumerator.Current);
             }
-                
+
+            if (DeviceCount == 0 && !String.IsNullOrWhiteSpace(DeviceId))
+                Disconnect();
 
         }
         private void InitDevice(ManagementObject device)
@@ -56,6 +58,9 @@ namespace net5Demo
             {
                 if (!string.IsNullOrWhiteSpace(DeviceId))
                     return;
+
+                if (DeviceId != device["DeviceID"].ToString())
+                    Disconnect();
 
                 DeviceId = device["DeviceID"].ToString();
                 DeviceName = device["Name"].ToString();                
@@ -80,7 +85,7 @@ namespace net5Demo
         #region Device
         private System.IO.Ports.SerialPort serialPort;
         private bool IsReading = false;
-        private List<byte> InputBuffer = null;
+        private List<byte> InputBuffer = new List<byte>();
 
         
                
@@ -105,6 +110,21 @@ namespace net5Demo
 
             }
         }
+        private void Disconnect()
+        {
+            try
+            {
+                DeviceId = string.Empty;
+                DeviceName = string.Empty;
+                ComPort = string.Empty;
+                
+                serialPort.Dispose();
+            }
+            catch(Exception)
+            {
+                
+            }
+        }
         private async void ReadData()
         {
             try
@@ -112,24 +132,19 @@ namespace net5Demo
                 if (serialPort == null)
                     return;
 
+                if (!serialPort.IsOpen)
+                    throw new Exception($"serialPort {ComPort} Not Open!");
+                
                 if (IsReading)
                     return;
 
-                if (InputBuffer == null)
-                    InputBuffer = new List<byte>();
-
                 IsReading = true;
-                LastReceived = DateTime.Now;
 
                 while (true)
                 {
-
-                    
                     int b = serialPort.ReadByte();
-                    if (b == 6)
-                    {
-                        // Do Nothing - Unit is jusr responding to a keep alive request.
-                    }
+                    if (b == 6) // Do Nothing - Unit is jusr responding to a keep alive request.
+                        continue;                  
                     else if (b == 2)
                     {
                         InputBuffer.Clear();
@@ -151,17 +166,11 @@ namespace net5Demo
                         CardDataEventArgs args = new CardDataEventArgs(result);
                         OnCardReceived(args);
                     }
-                    else
-                    {
-                        //bitCount = await reader.LoadAsync(1); //.AsTask();
-
-                    }
-
                 }
             }
             catch (Exception ex)
             {
-
+                Disconnect();
             }
             finally
             {
