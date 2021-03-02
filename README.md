@@ -12,7 +12,7 @@ Be sure to add the Device Capability of serialCommunication.<br />
 ><i>This can be found in the Package.appxmanifest file</i>
 
 # Example code for working with .net5 applications
-Sample code checks every 5 seconds for the Arduino to be plugged into the USB.
+Sample code checks every 5 seconds for the Arduino to be plugged into the USB.<br />
 The ComPort is automatically parsed out of the System.Management Object for ease of use. 
 
 # Example code for working with WPF Apps
